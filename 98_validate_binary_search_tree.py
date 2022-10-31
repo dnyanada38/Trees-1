@@ -79,6 +79,7 @@ def to_binary_tree(items):
     root = TreeNode(next(it))
     q = [root]
     for node in q:
+        # The extra argument to next is a default value, and __next__ doesn't take any extra arguments.
         val = next(it, None)
         if val is not None:
             node.left = TreeNode(val)
@@ -123,6 +124,39 @@ class Solution:
 
     def bst_postorder_iterative(self, root: Optional[TreeNode]) -> None:
         print("Iterative: Post-order traversal(Left, Right, Root): ", end = "")
+        # Check if root is null
+        if root == None:
+            return
+
+        # Declare a stack
+        stack = []
+
+        # Now start looping over the input tree
+        while root != None or stack:
+
+            # Traverse the left sub-tree as in post order traversal we take left, right, root
+            while root != None:
+                stack.append(root)
+                root = root.left
+
+            # Once we are done with left sub-tree we "peek" the top element of the stack.
+            # This is because we need to know if the left-most element of the tree has a right sub-tree or not
+            # If there is right sub-tree we need to traverse that first(as our expected order left, right, root)
+            # we peek using a temp variable
+            temp = stack[-1].right
+            if temp:
+                root = temp
+            else:
+                temp = stack.pop()
+                print(f"{temp.val} ", end = " ")
+
+                # Now if there would be a right sub-tree and the node we are currently at is a root of right sub-tree
+                # we need to pop the root out as we are done traversing children of the right subtree.
+                # if the current node is a left child then we won't go into the loop below.
+                # if the current node is a right child then we loop and traverse its root
+                while stack and temp == stack[-1].right:
+                    temp = stack.pop()
+                    print(f"{temp.val} ", end = " ")
         print()
 
     def bst_inorder_iterative(self, root: Optional[TreeNode]) -> None:
@@ -162,7 +196,14 @@ class Solution:
         self.bst_inorder_recursive(root.right)
 
     def bst_postorder_recursive(self, root: Optional[TreeNode]) -> None:
-        pass
+        # base case
+        if root == None:
+            return
+
+        # logic
+        self.bst_postorder_recursive(root.left)
+        self.bst_postorder_recursive(root.right)
+        print(f"{root.val} ", end = " ")
 
     def bst_inorder_recursive_helper(self, root: Optional[TreeNode]) -> None:
         # base case
@@ -182,7 +223,6 @@ class Solution:
         return self.bst_inorder_recursive_helper(root.right)
 
     def isValidBST(self, root: Optional[TreeNode]) -> bool:
-        '''
         ################# JUST FOR PRACTICE ###################
         self.bst_inorder_iterative(root)
         self.bst_preorder_iterative(root)
@@ -193,13 +233,13 @@ class Solution:
         print()
 
         print("Recursive: Pre-order traversal(Root, Left, Right): ", end = "")
-        self.bst_preorder_iterative(root)
+        self.bst_preorder_recursive(root)
         print()
 
         print("Recursive: Post-order traversal(Left, Right, Root): ", end = "")
         self.bst_postorder_recursive(root)
         print()
-        '''
+
         self.prev = None
         return self.bst_inorder_recursive_helper(root)
 
